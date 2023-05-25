@@ -14,7 +14,7 @@ let AppModule = class AppModule {
 AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            custom_nats_module_1.CustomNatsModule.register('mongodb://localhost:27017/my-database'),
+            custom_nats_module_1.CustomNatsModule.register('mongodb://localhost:27017/nats12'),
         ],
     })
 ], AppModule);

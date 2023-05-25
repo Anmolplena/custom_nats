@@ -11,10 +11,12 @@ exports.CustomNatsModule = void 0;
 const common_1 = require("@nestjs/common");
 const mongodb_1 = require("mongodb");
 const nats_service_1 = require("./nats.service");
+const nats_controller_1 = require("./nats.controller");
 let CustomNatsModule = CustomNatsModule_1 = class CustomNatsModule {
     static register(connectionString) {
         return {
             module: CustomNatsModule_1,
+            controllers: [nats_controller_1.ExampleController],
             providers: [
                 {
                     provide: 'NATS_CONNECTION',

@@ -1,15 +1,13 @@
-// nats.service.ts
-
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import {  connect, Msg, NatsConnection, PublishOptions, SubscriptionOptions } from 'nats';
+import { connect, NatsConnection, PublishOptions, SubscriptionOptions } from 'nats';
 
 @Injectable()
 export class NatsService implements OnModuleInit, OnModuleDestroy {
-  private client: any;
+  private client: NatsConnection;
 
   async onModuleInit() {
     // Connect to NATS server
-    this.client = await connect({ servers: ['nats://localhost:4222'] }); 
+    this.client = await connect({ servers: ['nats://localhost:4222'] }); // Replace with your NATS server address
   }
 
   onModuleDestroy() {
@@ -18,32 +16,17 @@ export class NatsService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  async createStream(stream: string, subject: string): Promise<void> {
+    const payload = JSON.stringify({ name: stream, subjects: [subject] });
+    await this.client.request('STREAM.CREATE', Uint8Array.from(Buffer.from(payload)));
+  }
+
   publish(subject: string, data: any, options?: PublishOptions): void {
-    this.client.publish(subject, JSON.stringify(data), options);
+    const payload = JSON.stringify(data);
+    this.client.publish(subject, Uint8Array.from(Buffer.from(payload)), options);
   }
 
-  subscribe(subject: string, callback: (msg: Msg) => void, options?: SubscriptionOptions): void {
-    this.client.subscribe(subject, callback, options);
-  }
-
-  async jsPublish(subject: string, data: any, options?: PublishOptions): Promise<void> {
-    await this.client.request('js.publish', JSON.stringify({ subject, data }), options);
-  }
-
-  async jsSubscribe(
-    subject: string,
-    callback: (msg: Msg) => void,
-    options?: SubscriptionOptions,
-  ): Promise<void> {
-    await this.client.subscribe(subject, callback, options);
-  }
-
-  async jsQueueSubscribe(
-    subject: string,
-    queueGroup: string,
-    callback: (msg: Msg) => void,
-    options?: SubscriptionOptions,
-  ): Promise<void> {
-    await this.client.subscribe(subject, { queue: queueGroup, ...options }, callback);
+  subscribe(subject: string, callback: (msg: any) => void, options?: SubscriptionOptions): void {
+    this.client.subscribe(subject, { callback, ...options });
   }
 }

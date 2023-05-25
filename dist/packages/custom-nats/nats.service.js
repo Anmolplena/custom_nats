@@ -18,20 +18,16 @@ let NatsService = class NatsService {
             this.client.close();
         }
     }
+    async createStream(stream, subject) {
+        const payload = JSON.stringify({ name: stream, subjects: [subject] });
+        await this.client.request('STREAM.CREATE', Uint8Array.from(Buffer.from(payload)));
+    }
     publish(subject, data, options) {
-        this.client.publish(subject, JSON.stringify(data), options);
+        const payload = JSON.stringify(data);
+        this.client.publish(subject, Uint8Array.from(Buffer.from(payload)), options);
     }
     subscribe(subject, callback, options) {
-        this.client.subscribe(subject, callback, options);
-    }
-    async jsPublish(subject, data, options) {
-        await this.client.request('js.publish', JSON.stringify({ subject, data }), options);
-    }
-    async jsSubscribe(subject, callback, options) {
-        await this.client.subscribe(subject, callback, options);
-    }
-    async jsQueueSubscribe(subject, queueGroup, callback, options) {
-        await this.client.subscribe(subject, Object.assign({ queue: queueGroup }, options), callback);
+        this.client.subscribe(subject, Object.assign({ callback }, options));
     }
 };
 NatsService = __decorate([
